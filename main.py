@@ -1,4 +1,4 @@
-import pyodbc
+import pyodbc, flask
 
 lv_odbc_conn = pyodbc.connect('Driver={/opt/sdb/MaxDB/lib/libsdbodbc.so}'
                           'Server=lnwts1;'
