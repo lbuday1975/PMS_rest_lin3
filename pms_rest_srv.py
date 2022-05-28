@@ -1,6 +1,8 @@
+import json
+
 from flask import Flask, request
 
-import marshmallow, jsonify, pms_command
+import jsonify, pms_command
 from flask_httpauth import HTTPBasicAuth
 
 auth = HTTPBasicAuth()
@@ -8,8 +10,8 @@ auth = HTTPBasicAuth()
 
 @auth.get_password
 def get_password(username):
-    if username == 'miguel4_RIgo':
-        return 'python'
+    if username == 'miguel':
+        return 'HogyNeM14'
     return None
 
 
@@ -37,11 +39,23 @@ def get_var():
         lv_rc = pms_command.chk_connect()
         if lv_rc == 0:
             print(f'ACT: get variable value to {ls_sys_name}-{ls_var_name}')
-            print("--> RET: " + pms_command.get_sys_var(f'{ls_sys_name}', f'\<{ls_var_name}\>'))
+            lv_txt = pms_command.get_sys_var(f'{ls_sys_name}', f'\<{ls_var_name}\>')
+            print("--> RET: " + str(lv_txt["VAR_VALUE"]))
             lv_grc = 0
         else:
             print("PMS server connection ERROR")
             lv_grc = "PMS server connection ERROR"
+
+    if lv_grc == "0":
+        lv_status = 200
+    else:
+        lv_status = 501
+
+    response = app.response_class(
+        response=json.dumps(lv_txt),
+        status=lv_status
+    )
+    return response
 
     return str(lv_grc)
 
@@ -49,7 +63,7 @@ def get_var():
 @app.route("/api/start_cmd", methods=['POST'])
 @auth.login_required
 def api_start_cmd():
-    lv_grc = "PMSRC:-1"
+    lv_grc = -1
     if request.method == 'POST':
         ls_sys_name = request.args.get('sys_name')
         ls_proc_name = request.args.get('proc_name')
@@ -59,16 +73,21 @@ def api_start_cmd():
         lv_rc = pms_command.chk_connect()
         if lv_rc == 0:
             print(f'Act: start command: {ls_sys_name}-{ls_proc_name} with parameter: {ls_param}')
-            lv_grc = "PMSRC:" + str(pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
+            lv_grc = str(pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
             print("--> RC : " + lv_grc)
         else:
             print("PMS server connection ERROR")
-            lv_grc = "PMSRC:3"
+            lv_grc = 3
     else:
         print("GET method call : NO action")
-        lv_grc = "PMSRC:4"
+        lv_grc = 4
 
-    return str(lv_grc)
+    # return str(lv_grc)
+    lv_json_rc = {
+        "RC": lv_grc
+    }
+    print(lv_json_rc)
+    return json.dumps(lv_json_rc)
 
 
 @app.route("/api/set_var", methods=['POST'])
@@ -93,6 +112,39 @@ def api_set_var():
         lv_grc = "GET method call : NO action"
 
     return str(lv_grc)
+
+
+@app.route("/api/check_cmd", methods=['GET'])
+@auth.login_required
+def api_check_cmd():
+
+    lv_grc = -1
+    if request.method == 'GET':
+        ls_sys_name = request.args.get('sys_name')
+        ls_proc_name = request.args.get('proc_name')
+
+        lv_rc = pms_command.chk_connect()
+        if lv_rc == 0:
+            print(f'Act: start command: {ls_sys_name}-{ls_proc_name}')
+            lv_grc, lv_txt = pms_command.check_cmd(f'{ls_sys_name}', f'{ls_proc_name}')
+            print("--> RC : " + lv_grc)
+        else:
+            print("PMS server connection ERROR")
+            lv_grc = 3
+    else:
+        print("GET method call : NO action")
+        lv_grc = 4
+
+    if lv_grc == "0":
+        lv_status = 200
+    else:
+        lv_status = 501
+
+    response = app.response_class(
+        response=json.dumps(lv_txt),
+        status=lv_status
+    )
+    return response
 
 
 if __name__ == "__main__":
