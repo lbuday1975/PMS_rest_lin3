@@ -50,6 +50,7 @@ def get_var():
 @auth.login_required
 def api_start_cmd():
     lv_grc = "PMSRC:-1"
+    lv_grc_cmd = ""
     if request.method == 'POST':
         ls_sys_name = request.args.get('sys_name')
         ls_proc_name = request.args.get('proc_name')
@@ -59,8 +60,10 @@ def api_start_cmd():
         lv_rc = pms_command.chk_connect()
         if lv_rc == 0:
             print(f'Act: start command: {ls_sys_name}-{ls_proc_name} with parameter: {ls_param}')
-            lv_grc = "PMSRC:" + str(pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
-            print("--> RC : " + lv_grc)
+            lv_grc_cmd = pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}')
+            # lv_grc = "PMSRC:" + str(pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
+            print("--> Return : " + lv_grc_cmd)
+            lv_grc = lv_grc_cmd
         else:
             print("PMS server connection ERROR")
             lv_grc = "PMSRC:3"

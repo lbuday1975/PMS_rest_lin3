@@ -73,9 +73,16 @@ def start_cmd(la_sys_name, la_proc_name, la_param):
 
         for lv_line in lv_out.splitlines():
             if DEBUG:
-                print(str(lv_line.decode()))
+                print(lv_line.decode())
+                if lv_line.decode().find("Start date:") != -1:
+                    lv_sdate = lv_line.decode().split(": ",1)
+                if lv_line.decode().find("Start time:") != -1:
+                    lv_stime = lv_line.decode().split(": ", 1)
+                if lv_line.decode().find("Duration:") != -1:
+                    lv_duration = lv_line.decode().split(": ", 1)
 
-        lv_rc = str(lv_proc.poll())
+
+        lv_rc = "{'RC':" + str(lv_proc.poll()) + ", 'SDATE': '" + lv_sdate[1] + "', 'STIME': '" + lv_stime[1] + "', 'DURATION': '" + lv_duration[1] + "'} \n"
     except sp.CalledProcessError as lv_ex:
         print("ERROR: " + lv_ex.output.decode())
         lv_rc = 999
