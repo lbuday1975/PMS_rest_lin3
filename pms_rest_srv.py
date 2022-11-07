@@ -9,7 +9,7 @@ auth = HTTPBasicAuth()
 @auth.get_password
 def get_password(username):
     if username == 'commander':
-        return 'pYth0FF1199'
+        return 'pYthOFF1199'
     return None
 
 
