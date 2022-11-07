@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-import marshmallow, jsonify, pms_command
+import pms_command
 from flask_httpauth import HTTPBasicAuth
 
 auth = HTTPBasicAuth()
@@ -99,7 +99,7 @@ def api_start_async_cmd():
         print("GET method call : NO action")
         lv_grc = "PMSRC:4"
 
-    return str(lv_grc+"\n")
+    return str(lv_grc + "\n")
 
 
 @app.route("/api/check_cmd", methods=['GET'])
@@ -129,7 +129,6 @@ def api_check_cmd():
         lv_grc = "PMSRC:4"
 
     return str(lv_grc)
-
 
 
 @app.route("/api/set_var", methods=['POST'])
