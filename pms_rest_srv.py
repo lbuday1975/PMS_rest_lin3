@@ -8,8 +8,8 @@ auth = HTTPBasicAuth()
 
 @auth.get_password
 def get_password(username):
-    if username == 'miguel4_RIgo':
-        return 'python'
+    if username == 'commander':
+        return 'pYth0FF1199'
     return None
 
 
@@ -63,7 +63,10 @@ def api_start_cmd():
             lv_grc_cmd = pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}')
             # lv_grc = "PMSRC:" + str(pms_command.start_cmd(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
             print("--> Return : " + lv_grc_cmd)
-            lv_grc = lv_grc_cmd
+            if lv_grc_cmd == "2":
+                lv_grc = "PMSRC:2"
+            else:
+                lv_grc = lv_grc_cmd + "PMSRC:0"
         else:
             print("PMS server connection ERROR")
             lv_grc = "PMSRC:3"
@@ -72,6 +75,31 @@ def api_start_cmd():
         lv_grc = "PMSRC:4"
 
     return str(lv_grc)
+
+
+@app.route("/api/start_cmd_async", methods=['POST'])
+@auth.login_required
+def api_start_async_cmd():
+    lv_grc = "PMSRC:-1"
+    if request.method == 'POST':
+        ls_sys_name = request.args.get('sys_name')
+        ls_proc_name = request.args.get('proc_name')
+        ls_param = request.args.get('param')
+        if ls_param == None:
+            ls_param = "-"
+        lv_rc = pms_command.chk_connect()
+        if lv_rc == 0:
+            print(f'Act: start command: {ls_sys_name}-{ls_proc_name} with parameter: {ls_param}')
+            lv_grc = "PMSRC:" + str(pms_command.start_cmd_async(f'{ls_sys_name}', f'{ls_proc_name}', f'{ls_param}'))
+            print("--> RC : " + lv_grc)
+        else:
+            print("PMS server connection ERROR")
+            lv_grc = "PMSRC:3"
+    else:
+        print("GET method call : NO action")
+        lv_grc = "PMSRC:4"
+
+    return str(lv_grc+"\n")
 
 
 @app.route("/api/set_var", methods=['POST'])
