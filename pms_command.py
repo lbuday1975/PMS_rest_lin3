@@ -116,3 +116,53 @@ def start_cmd_async(la_sys_name, la_proc_name, la_param):
         lv_rc = 999
 
     return lv_rc
+
+
+def check_cmd(la_sys_name, la_proc_name):
+    lv_rc = 999
+
+    lv_cmd = f'/opt/PMS/bin/pms_commander_server.sh -c COMMAND_STATUS -i "{la_sys_name}" -t "{la_proc_name}"'
+    print("--> CMD: " + lv_cmd)
+    lv_proc = sp.Popen([lv_cmd], stdout=sp.PIPE, shell=True)
+    try:
+        lv_out, lv_err = lv_proc.communicate()
+        lv_sdate="-"
+        lv_stime="-"
+        lv_duration="-"
+        lv_result="-"
+        lv_suppress="-"
+        lv_running = "-"
+        for lv_line in lv_out.splitlines():
+            if DEBUG:
+                print(lv_line.decode())
+                if lv_line.decode().find("Start date:") != -1:
+                    if lv_sdate == "-":
+                        lv_sdate = lv_line.decode().split(":",1)
+                if lv_line.decode().find("Start time:") != -1:
+                    if lv_stime == "-":
+                        lv_stime = lv_line.decode().split(":", 1)
+                if lv_line.decode().find("Duration:") != -1:
+                    if lv_duration == "-":
+                        lv_duration = lv_line.decode().split(":", 1)
+                if lv_line.decode().find("Result:") != -1:
+                    if lv_result == "-":
+                        lv_result = lv_line.decode().split(":", 1)
+                if lv_line.decode().find("Suppressed:") != -1:
+                    if lv_suppress == "-":
+                        lv_suppress = lv_line.decode().split(":", 1)
+                if lv_line.decode().find("Running:") != -1:
+                    if lv_running == "-":
+                        lv_running = lv_line.decode().split(":", 1)
+
+        if lv_proc.poll() == 0:
+            if str(lv_running[1]) == ' true':
+                lv_rc = "{'RC':" + lv_result[1] + ",'RUNNING':" + lv_running[1] + ",'SUPPRESSED':" + lv_suppress[1] + ",'SDATE':'" + lv_sdate[1] + "','STIME':'" + lv_stime[1] + "','DURATION':'-'} \n"
+            else:
+                lv_rc = "{'RC':" + lv_result[1] + ",'RUNNING':" + lv_running[1] + ",'SUPPRESSED':" + lv_suppress[1] + ",'SDATE':'" + lv_sdate[1] + "','STIME':'" + lv_stime[1] + "','DURATION':'" + lv_duration[1] + "'} \n"
+        else:
+            lv_rc = str(lv_proc.poll())
+    except sp.CalledProcessError as lv_ex:
+        print("ERROR: " + lv_ex.output.decode())
+        lv_rc = 999
+
+    return lv_rc
