@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-import marshmallow, jsonify, pms_command
+import pms_command
 from flask_httpauth import HTTPBasicAuth
 
 auth = HTTPBasicAuth()
@@ -9,7 +9,7 @@ auth = HTTPBasicAuth()
 @auth.get_password
 def get_password(username):
     if username == 'commander':
-        return 'pYth0FF1199'
+        return 'pYthOFF1199'
     return None
 
 
@@ -99,7 +99,36 @@ def api_start_async_cmd():
         print("GET method call : NO action")
         lv_grc = "PMSRC:4"
 
-    return str(lv_grc+"\n")
+    return str(lv_grc + "\n")
+
+
+@app.route("/api/check_cmd", methods=['GET'])
+@auth.login_required
+def api_check_cmd():
+    lv_grc = "PMSRC:-1"
+    lv_grc_cmd = ""
+    if request.method == 'GET':
+        ls_sys_name = request.args.get('sys_name')
+        ls_proc_name = request.args.get('proc_name')
+
+        # Check if server live
+        lv_rc = pms_command.chk_connect()
+        if lv_rc == 0:
+            print(f'Act: check command: {ls_sys_name}-{ls_proc_name} last run')
+            lv_grc_cmd = pms_command.check_cmd(f'{ls_sys_name}', f'{ls_proc_name}')
+            print("--> Return : " + lv_grc_cmd)
+            if lv_grc_cmd == "2":
+                lv_grc = "PMSRC:2"
+            else:
+                lv_grc = lv_grc_cmd + "PMSRC:0"
+        else:
+            print("PMS server connection ERROR")
+            lv_grc = "PMSRC:3"
+    else:
+        print("GET method call : NO action")
+        lv_grc = "PMSRC:4"
+
+    return str(lv_grc)
 
 
 @app.route("/api/set_var", methods=['POST'])
@@ -127,4 +156,4 @@ def api_set_var():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
