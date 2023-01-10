@@ -147,6 +147,8 @@ def check_cmd(la_sys_name, la_proc_name):
                 if lv_line.decode().find("Result:") != -1:
                     if lv_result == "-":
                         lv_result = lv_line.decode().split(":", 1)
+                else:
+                    lv_result = ['Result', '-2']
                 if lv_line.decode().find("Suppressed:") != -1:
                     if lv_suppress == "-":
                         lv_suppress = lv_line.decode().split(":", 1)
@@ -156,6 +158,7 @@ def check_cmd(la_sys_name, la_proc_name):
 
         if lv_proc.poll() == 0:
             if str(lv_running[1]) == ' true':
+                if DEBUG: print(str(lv_result) + "__" + str(lv_running) + "__" + str(lv_suppress) + "__" + str(lv_sdate) + "__" + str(lv_stime))
                 lv_rc = "{'RC':" + lv_result[1] + ",'RUNNING':" + lv_running[1] + ",'SUPPRESSED':" + lv_suppress[1] + ",'SDATE':'" + lv_sdate[1] + "','STIME':'" + lv_stime[1] + "','DURATION':'-'} \n"
             else:
                 lv_rc = "{'RC':" + lv_result[1] + ",'RUNNING':" + lv_running[1] + ",'SUPPRESSED':" + lv_suppress[1] + ",'SDATE':'" + lv_sdate[1] + "','STIME':'" + lv_stime[1] + "','DURATION':'" + lv_duration[1] + "'} \n"
